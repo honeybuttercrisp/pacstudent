@@ -1,1 +1,3 @@
-# pacstudent
+# PacStudent
+
+A PacMan clone
