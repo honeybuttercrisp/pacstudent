@@ -11,7 +11,7 @@ public class AudioManager : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        audioSource.volume = 0.2f;
+        audioSource.volume = 0.1f;
         PlayIntroMusic();
 
     }
