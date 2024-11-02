@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -7,9 +8,14 @@ using UnityEngine.UI;
 
 public class UIManager : MonoBehaviour
 {
+    [SerializeField] private TextMeshProUGUI highScoreText;
+    [SerializeField] private TextMeshProUGUI bestTimeText;
+
     // Start is called before the first frame update
     void Start()
     {
+        LoadHighScore();
+
         GameObject quitButton = GameObject.FindGameObjectWithTag("QuitButton");
         if (quitButton != null)
         {
@@ -18,11 +24,22 @@ public class UIManager : MonoBehaviour
         }
     }
 
-    // Update is called once per frame
-    void Update()
+    private void LoadHighScore()
     {
-        
+        int highScore = PlayerPrefs.GetInt("HighScore", 0);
+        float bestTime = PlayerPrefs.GetFloat("BestTime", 0);
 
+        highScoreText.text = "High Score: " + highScore;
+        bestTimeText.text = "Best Time: " + FormatTime(bestTime);
+
+    }
+
+    private string FormatTime(float time)
+    {
+        int mins = Mathf.FloorToInt(time / 60);
+        int secs = Mathf.FloorToInt(time % 60);
+        int millis = Mathf.FloorToInt((time * 100) % 100);
+        return string.Format("{0:00}:{1:00}:{2:00}", mins, secs, millis);
     }
 
     public void QuitGame()

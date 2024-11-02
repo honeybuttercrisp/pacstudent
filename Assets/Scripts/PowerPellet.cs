@@ -2,17 +2,12 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PowerPellet : MonoBehaviour
+public class PowerPellet : Pellet
 {
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
+    public float duration = 10.0f;
 
-    // Update is called once per frame
-    void Update()
+    protected override void Collect()
     {
-        
+        Object.FindFirstObjectByType<GameManager>().PowerPelletCollected(this);
     }
 }
