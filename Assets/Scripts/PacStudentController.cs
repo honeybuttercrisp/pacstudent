@@ -14,11 +14,11 @@ public class PacStudentController : MonoBehaviour
     [SerializeField] private AudioClip wallThudSound;
     [SerializeField] private GameObject wallCollisionEffectPrefab;
     [SerializeField] private GameObject deathEffectPrefab;
-    [SerializeField] private GameObject windTrailEffectPrefab; // New dust/wind trail effect prefab
+    [SerializeField] private GameObject windTrailEffectPrefab;
 
-    private GameObject currentWindTrail; // Reference to current wind trail effect
-    private float trailUpdateInterval = 0.1f; // How often to spawn new trail particles
-    private float lastTrailTime; // Track last trail spawn time
+    private GameObject currentWindTrail;
+    private float trailUpdateInterval = 0.1f;
+    private float lastTrailTime;
 
     [SerializeField] private float moveDuration = 0.2f;
     private float gridSize = 1.0f;
@@ -87,10 +87,9 @@ public class PacStudentController : MonoBehaviour
     {
         if (windTrailEffectPrefab != null)
         {
-            // Spawn trail slightly behind the character based on movement direction
+            // Spawn trail behind PacStudent on movement direction
             Vector3 trailPosition = pacStudent.transform.position - (currentInput * 0.5f);
 
-            // Adjust the trail position slightly downward so it appears more grounded
             trailPosition.y += 0.2f;
             trailPosition.x -= 0.3f;
 

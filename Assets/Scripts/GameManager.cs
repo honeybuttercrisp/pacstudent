@@ -23,8 +23,6 @@ public class GameManager : MonoBehaviour
     public AudioClip pelletEatSound;
     public AudioClip deathSound;
 
-
-    private bool roundStarted = false;
     public float timerOffset;
 
 
@@ -51,8 +49,6 @@ public class GameManager : MonoBehaviour
 
     private void NewRound()
     {
-        roundStarted = false;
-
         foreach (Transform pellet in pellets)
         {
             pellet.gameObject.SetActive(true);
@@ -82,7 +78,6 @@ public class GameManager : MonoBehaviour
 
     private void StartRound()
     {
-        roundStarted = true;
         timerOffset = Time.timeSinceLevelLoad;
         inGameUI.StartTimer();
 
