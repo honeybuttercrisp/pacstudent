@@ -137,6 +137,7 @@ public class GameManager : MonoBehaviour
     public void PacStudentSlain()
     {
         tweener.ClearTweens();
+        pacStudentController.GetComponent<PacStudentController>().PlayDeathEffect();
         pacStudentController.gameObject.SetActive(false);
         pacStudent.GetComponent<BoxCollider2D>().enabled = false;
         PlaySound(deathSound);

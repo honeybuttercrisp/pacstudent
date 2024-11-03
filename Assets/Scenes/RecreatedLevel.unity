@@ -6188,6 +6188,7 @@ MonoBehaviour:
   wallThudSound: {fileID: 8300000, guid: 82f16eb48a815fd4a83c0f42d881bf9a, type: 3}
   wallCollisionEffectPrefab: {fileID: 5356088054203291163, guid: 2bd6780f329861e4cbb5b9a0e0708ef4, type: 3}
   deathEffectPrefab: {fileID: 7639054936781266763, guid: 223b95127506bb34ea6eea43d097636d, type: 3}
+  windTrailEffectPrefab: {fileID: 8420484491387919677, guid: 51c9d11bd56e4f74abff3fe17f238dfa, type: 3}
   moveDuration: 0.2
   lastPosition: {x: 0, y: 0, z: 0}
 --- !u!4 &551082916

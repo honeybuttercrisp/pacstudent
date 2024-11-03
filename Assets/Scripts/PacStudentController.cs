@@ -14,7 +14,11 @@ public class PacStudentController : MonoBehaviour
     [SerializeField] private AudioClip wallThudSound;
     [SerializeField] private GameObject wallCollisionEffectPrefab;
     [SerializeField] private GameObject deathEffectPrefab;
+    [SerializeField] private GameObject windTrailEffectPrefab; // New dust/wind trail effect prefab
 
+    private GameObject currentWindTrail; // Reference to current wind trail effect
+    private float trailUpdateInterval = 0.1f; // How often to spawn new trail particles
+    private float lastTrailTime; // Track last trail spawn time
 
     [SerializeField] private float moveDuration = 0.2f;
     private float gridSize = 1.0f;
@@ -22,7 +26,7 @@ public class PacStudentController : MonoBehaviour
     private Vector3 currentInput;
     public Vector3 lastPosition;
     private bool isFirstMove = true;
-    private bool wasMovingLastFrame = false; // Track if PacStudent was moving last frame
+    private bool wasMovingLastFrame = false;
 
     void Awake()
     {
@@ -65,6 +69,12 @@ public class PacStudentController : MonoBehaviour
         {
             TryMove();
         }
+
+        // Update trail effect while moving
+        if (!tweener.IsTweenComplete() && Time.time - lastTrailTime > trailUpdateInterval)
+        {
+            UpdateWindTrail();
+        }
     }
 
     private void EnableAudio()
@@ -73,24 +83,50 @@ public class PacStudentController : MonoBehaviour
         isFirstMove = false;
     }
 
+    private void UpdateWindTrail()
+    {
+        if (windTrailEffectPrefab != null)
+        {
+            // Spawn trail slightly behind the character based on movement direction
+            Vector3 trailPosition = pacStudent.transform.position - (currentInput * 0.5f);
+
+            // Adjust the trail position slightly downward so it appears more grounded
+            trailPosition.y += 0.2f;
+            trailPosition.x -= 0.3f;
+
+            GameObject trail = Instantiate(windTrailEffectPrefab, trailPosition, Quaternion.identity);
+
+            // Calculate rotation based on movement direction
+            float angle = 0;
+            if (currentInput == Vector3.up) angle = 180;
+            else if (currentInput == Vector3.down) angle = 0;
+            else if (currentInput == Vector3.left) angle = 90;
+            else if (currentInput == Vector3.right) angle = 270;
+
+            trail.transform.rotation = Quaternion.Euler(0, 0, angle);
+
+            // Destroy the trail effect after a short duration
+            Destroy(trail, 0.45f);
+
+            lastTrailTime = Time.time;
+        }
+    }
+
     private void TryMove()
     {
         bool moved = false;
         lastPosition = pacStudent.transform.position;
 
-        // Calculate target position
         Vector3 targetPosition = pacStudent.transform.position + lastInput * gridSize;
 
         if (IsWalkable(targetPosition))
         {
-            // Update direction and move
             currentInput = lastInput;
             StartMovement(targetPosition, lastInput);
             moved = true;
         }
         else if (currentInput != Vector3.zero)
         {
-            // Attempt to move in currentInput direction if lastInput is blocked
             targetPosition = pacStudent.transform.position + currentInput * gridSize;
 
             if (IsWalkable(targetPosition))
@@ -100,10 +136,9 @@ public class PacStudentController : MonoBehaviour
             }
         }
 
-        // If PacStudent couldn't move in either direction
         if (!moved)
         {
-            if (wasMovingLastFrame && lastInput != Vector3.zero) // Only play thud if PacStudent was moving and trying to move
+            if (wasMovingLastFrame && lastInput != Vector3.zero)
             {
                 PlayWallThudSound();
                 PlayWallCollisionEffect(lastInput);
@@ -133,7 +168,6 @@ public class PacStudentController : MonoBehaviour
     {
         tweener.AddTween(pacStudent.transform, pacStudent.transform.position, targetPosition, moveDuration);
 
-        // Enable animator and play walk animation
         animator.enabled = true;
         if (direction == Vector3.up) animator.Play("Walk_Up");
         else if (direction == Vector3.down) animator.Play("Walk_Down");
@@ -141,6 +175,9 @@ public class PacStudentController : MonoBehaviour
         else if (direction == Vector3.right) animator.Play("Walk_Right");
 
         PlayMovingSound();
+
+        // Spawn initial trail effect when starting movement
+        UpdateWindTrail();
     }
 
     public void StopMovement()
@@ -193,9 +230,9 @@ public class PacStudentController : MonoBehaviour
     {
         if (deathEffectPrefab != null)
         {
-            Vector3 deathPosition = pacStudent.transform.position;  // Position where the effect will play
+            Vector3 deathPosition = pacStudent.transform.position;
             GameObject effect = Instantiate(deathEffectPrefab, deathPosition, Quaternion.identity);
-            Destroy(effect, 2f);  // Destroy after 2 seconds
+            Destroy(effect, 2f);
         }
     }
 }
