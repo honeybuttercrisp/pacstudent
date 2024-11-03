@@ -9,14 +9,12 @@ public class AudioManager : MonoBehaviour
     public AudioClip normalGhostsMusic;
 
 
-    // Start is called before the first frame update
     void Start()
     {
         audioSource.volume = 0.1f;
         PlayIntroMusic();
     }
 
-    // Update is called once per frame
     void Update()
     {
 
@@ -26,13 +24,13 @@ public class AudioManager : MonoBehaviour
     {
         audioSource.clip = introMusic;
         audioSource.Play();
-        Invoke("PlayNormalGhostsMusic", introMusic.length);
+        Invoke("PlayNormalGhostsMusic", 3);
     }
 
     void PlayNormalGhostsMusic()
     {
         audioSource.clip = normalGhostsMusic;
-        audioSource.loop = true;
         audioSource.Play();
+        audioSource.loop = true;
     }
 }

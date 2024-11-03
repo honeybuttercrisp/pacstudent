@@ -11,7 +11,6 @@ public class UIManager : MonoBehaviour
     [SerializeField] private TextMeshProUGUI highScoreText;
     [SerializeField] private TextMeshProUGUI bestTimeText;
 
-    // Start is called before the first frame update
     void Start()
     {
         LoadHighScore();

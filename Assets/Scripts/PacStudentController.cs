@@ -10,19 +10,27 @@ public class PacStudentController : MonoBehaviour
     private Tweener tweener;
     [SerializeField] private Animator animator;
     [SerializeField] private AudioSource audioSource;
+    [SerializeField] private AudioSource wallThudSource;
+    [SerializeField] private AudioClip wallThudSound; 
+    [SerializeField] private GameObject wallCollisionEffectPrefab; 
+
     [SerializeField] private float moveDuration = 0.2f;
     private float gridSize = 1.0f;
     private Vector3 lastInput;
     private Vector3 currentInput;
     private Vector3 lastPosition;
     private bool isFirstMove = true;
+    private bool wasMovingLastFrame = false; // Track if PacStudent was moving last frame
 
     void Awake()
     {
         tweener = GetComponent<Tweener>();
-        // Ensure audio is disabled at start
+
         audioSource.enabled = false;
-        // Ensure animation is stopped at start
+        if (wallThudSource == null)
+        {
+            wallThudSource = gameObject.AddComponent<AudioSource>();
+        }
         animator.enabled = false;
     }
 
@@ -90,10 +98,25 @@ public class PacStudentController : MonoBehaviour
             }
         }
 
-        // If we couldn't move in either direction
+        // If PacStudent couldn't move in either direction
         if (!moved)
         {
+            if (wasMovingLastFrame && lastInput != Vector3.zero) // Only play thud if PacStudent was moving and trying to move
+            {
+                PlayWallThudSound();
+                PlayWallCollisionEffect(lastInput);
+            }
             StopMovement();
+        }
+
+        wasMovingLastFrame = moved;
+    }
+
+    private void PlayWallThudSound()
+    {
+        if (wallThudSound != null && wallThudSource != null)
+        {
+            wallThudSource.PlayOneShot(wallThudSound);
         }
     }
 
@@ -118,10 +141,10 @@ public class PacStudentController : MonoBehaviour
         PlayMovingSound();
     }
 
-    private void StopMovement()
+    public void StopMovement()
     {
         StopMovingSound();
-        animator.enabled = false;  // This will stop the animation
+        animator.enabled = false;
     }
 
     private void PlayMovingSound()
@@ -136,11 +159,31 @@ public class PacStudentController : MonoBehaviour
         }
     }
 
-    private void StopMovingSound()
+    public void StopMovingSound()
     {
         if (audioSource.isPlaying)
         {
             audioSource.Stop();
+        }
+    }
+
+    private void PlayWallCollisionEffect(Vector3 direction)
+    {
+        if (wallCollisionEffectPrefab != null)
+        {
+            Vector3 collisionPoint = pacStudent.transform.position + (direction * (gridSize / 2));
+
+            GameObject effect = Instantiate(wallCollisionEffectPrefab, collisionPoint, Quaternion.identity);
+
+            float angle = 0;
+            if (direction == Vector3.up) angle = 270;
+            else if (direction == Vector3.down) angle = 90;
+            else if (direction == Vector3.left) angle = 0;
+            else if (direction == Vector3.right) angle = 180;
+
+            effect.transform.rotation = Quaternion.Euler(0, 0, angle);
+
+            Destroy(effect, 2f);
         }
     }
 }

@@ -170,4 +170,5 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   points: 50
+  pelletEatSound: {fileID: 8300000, guid: 92f0304e6cb724e43b4fe09287b30f34, type: 3}
   duration: 8
