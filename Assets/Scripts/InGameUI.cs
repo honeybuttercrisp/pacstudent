@@ -12,6 +12,8 @@ public class InGameUI : MonoBehaviour
     [SerializeField] private TextMeshProUGUI gameOverText;
     [SerializeField] private Button exitButton;
     [SerializeField] private TextMeshProUGUI countdownText;
+    [SerializeField] private List<GameObject> lifeIcons;
+    [SerializeField] private TextMeshProUGUI ghostTimerText;
 
     private GameManager gameManager;
     private bool timerRunning = false;
@@ -22,6 +24,8 @@ public class InGameUI : MonoBehaviour
         UpdateScoreText(gameManager.score);
         gameOverText.gameObject.SetActive(false);
         exitButton.onClick.AddListener(ReturnToStartScene);
+        UpdateLives(gameManager.lives);
+        ghostTimerText.gameObject.SetActive(false);
     }
 
     void Update()
@@ -76,4 +80,27 @@ public class InGameUI : MonoBehaviour
         countdownText.gameObject.SetActive(false);
     }
 
+    public void UpdateLives(int lives)
+    {
+        for (int i = 0; i < lifeIcons.Count; i++)
+        {
+            lifeIcons[i].SetActive(i < lives);
+        }
+    }
+
+    public void ShowGhostTimer(int seconds)
+    {
+        ghostTimerText.gameObject.SetActive(true);
+        ghostTimerText.text = seconds.ToString(); 
+    }
+
+    public void UpdateGhostTimer(int seconds)
+    {
+        ghostTimerText.text = seconds.ToString(); 
+    }
+
+    public void HideGhostTimer()
+    {
+        ghostTimerText.gameObject.SetActive(false); 
+    }
 }

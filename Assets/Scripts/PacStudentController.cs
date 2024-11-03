@@ -18,7 +18,7 @@ public class PacStudentController : MonoBehaviour
     private float gridSize = 1.0f;
     private Vector3 lastInput;
     private Vector3 currentInput;
-    private Vector3 lastPosition;
+    public Vector3 lastPosition;
     private bool isFirstMove = true;
     private bool wasMovingLastFrame = false; // Track if PacStudent was moving last frame
 

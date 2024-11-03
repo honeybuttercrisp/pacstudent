@@ -1,15 +1,17 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
-    public GameObject[] ghosts;
+    [SerializeField] public GameObject[] ghosts;
     public GameObject pacStudent;
+    [SerializeField] public GameObject pacStudentController;
+    public Tweener tweener;
 
     public Transform pellets;
-    [SerializeField] private PacStudentController pacStudentController;
 
     public int score { get; private set; }
     public int lives { get; private set; }
@@ -26,7 +28,7 @@ public class GameManager : MonoBehaviour
 
     private void Start()
     {
-        pacStudentController.GetComponent<PacStudentController>().enabled = false;
+        pacStudentController.gameObject.SetActive(false);
 
         audioSource = GetComponent<AudioSource>();
         if (audioSource == null)
@@ -57,8 +59,8 @@ public class GameManager : MonoBehaviour
     }
 
     private IEnumerator RoundStartCountdown()
-    {
-        // Show the countdown sequence with delays
+    {        // Show the countdown sequence with delays
+
         inGameUI.ShowCountdown("3");
         yield return new WaitForSeconds(1);
 
@@ -82,17 +84,13 @@ public class GameManager : MonoBehaviour
         timerOffset = Time.timeSinceLevelLoad;
         inGameUI.StartTimer();
 
-        pacStudentController.GetComponent<PacStudentController>().enabled = true;
+        pacStudentController.gameObject.SetActive(true);
     }
 
-    private void ResetState()
+    private void RespawnPacStudent()
     {
-        for (int i = 0; i < ghosts.Length; i++)
-        {
-            ghosts[i].SetActive(true);
-        }
-
-        pacStudent.SetActive(true);
+        pacStudent.transform.position = new Vector3(-9.5f, 3.5f, 0);
+        pacStudentController.gameObject.SetActive(true);
     }
 
     public void GameOver()
@@ -100,7 +98,7 @@ public class GameManager : MonoBehaviour
         if (isGameOver) return;
         isGameOver = true;
 
-        pacStudentController.GetComponent<PacStudentController>().enabled = false;
+        pacStudentController.gameObject.SetActive(false);
 
         inGameUI.ShowGameOver();
 
@@ -131,15 +129,16 @@ public class GameManager : MonoBehaviour
         SetScore(score + ghost.points);
     }
 
-    public void PacStudentEaten()
+    public void PacStudentSlain()
     {
-        pacStudent.gameObject.SetActive(false);
-
+        tweener.ClearTweens();
+        pacStudentController.gameObject.SetActive(false);
         SetLives(lives - 1);
+        inGameUI.UpdateLives(lives);
 
         if (lives > 0)
         {
-            Invoke(nameof(ResetState), 3.0f);
+            Invoke(nameof(RespawnPacStudent), 3.0f);
         }
         else
         {
@@ -155,7 +154,6 @@ public class GameManager : MonoBehaviour
 
         if (!HasRemainingPellets())
         {
-            pacStudent.gameObject.SetActive(false);
             GameOver();
         }
     }
@@ -165,7 +163,60 @@ public class GameManager : MonoBehaviour
         PelletCollected(powerPellet);
         PlaySound(pelletEatSound);
 
-        // Change the state of the ghosts
+        // Set all ghosts to the Scared state
+        foreach (GameObject ghost in ghosts)
+        {
+            Ghost ghostComponent = ghost.GetComponent<Ghost>();
+            if (ghostComponent != null)
+            {
+                ghostComponent.SetScared();
+            }
+        }
+
+        // Show the countdown timer UI starting from 10 seconds
+        inGameUI.ShowGhostTimer(10);
+
+        // Start coroutine for scared state timer
+        StartCoroutine(GhostScaredTimer());
+    }
+
+    private IEnumerator GhostScaredTimer()
+    {
+        int timer = 10;
+
+        // Countdown loop
+        while (timer > 0)
+        {
+            if (timer == 3)
+            {
+                // Change ghosts to Recovering at 3 seconds left
+                foreach (GameObject ghost in ghosts)
+                {
+                    Ghost ghostComponent = ghost.GetComponent<Ghost>();
+                    if (ghostComponent != null && ghostComponent.currentState == Ghost.GhostState.Scared)
+                    {
+                        ghostComponent.SetRecovering();
+                    }
+                }
+            }
+
+            inGameUI.UpdateGhostTimer(timer); // Update the timer UI
+            yield return new WaitForSeconds(1); // Wait for one second
+            timer--;
+        }
+
+        // Hide the ghost timer once countdown is complete
+        inGameUI.HideGhostTimer();
+
+        // Set all ghosts back to Normal state
+        foreach (GameObject ghost in ghosts)
+        {
+            Ghost ghostComponent = ghost.GetComponent<Ghost>();
+            if (ghostComponent != null && ghostComponent.currentState == Ghost.GhostState.Recovering)
+            {
+                ghostComponent.SetNormal();
+            }
+        }
     }
 
     public void CherryCollected(Cherry cherry)

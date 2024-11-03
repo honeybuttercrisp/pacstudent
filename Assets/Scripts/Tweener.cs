@@ -35,4 +35,11 @@ public class Tweener : MonoBehaviour
     {
         return activeTweens.Count == 0;
     }
+
+    public void ClearTweens()
+    {
+        activeTweens.Clear();
+    }
+
+
 }
