@@ -11,8 +11,10 @@ public class PacStudentController : MonoBehaviour
     [SerializeField] private Animator animator;
     [SerializeField] private AudioSource audioSource;
     [SerializeField] private AudioSource wallThudSource;
-    [SerializeField] private AudioClip wallThudSound; 
-    [SerializeField] private GameObject wallCollisionEffectPrefab; 
+    [SerializeField] private AudioClip wallThudSound;
+    [SerializeField] private GameObject wallCollisionEffectPrefab;
+    [SerializeField] private GameObject deathEffectPrefab;
+
 
     [SerializeField] private float moveDuration = 0.2f;
     private float gridSize = 1.0f;
@@ -184,6 +186,16 @@ public class PacStudentController : MonoBehaviour
             effect.transform.rotation = Quaternion.Euler(0, 0, angle);
 
             Destroy(effect, 2f);
+        }
+    }
+
+    public void PlayDeathEffect()
+    {
+        if (deathEffectPrefab != null)
+        {
+            Vector3 deathPosition = pacStudent.transform.position;  // Position where the effect will play
+            GameObject effect = Instantiate(deathEffectPrefab, deathPosition, Quaternion.identity);
+            Destroy(effect, 2f);  // Destroy after 2 seconds
         }
     }
 }

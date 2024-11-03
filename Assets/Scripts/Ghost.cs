@@ -42,6 +42,7 @@ public class Ghost : MonoBehaviour
     {
         Object.FindFirstObjectByType<GameManager>().GhostEaten(this);
         SetDead();
+        AudioManager.Instance.PlayDeadGhostsMusic();
         StartCoroutine(RespawnAfterDelay(5f));
     }
 

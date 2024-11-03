@@ -21,6 +21,8 @@ public class GameManager : MonoBehaviour
 
     [SerializeField] private AudioSource audioSource;
     public AudioClip pelletEatSound;
+    public AudioClip deathSound;
+
 
     private bool roundStarted = false;
     public float timerOffset;
@@ -59,7 +61,7 @@ public class GameManager : MonoBehaviour
     }
 
     private IEnumerator RoundStartCountdown()
-    {        // Show the countdown sequence with delays
+    {
 
         inGameUI.ShowCountdown("3");
         yield return new WaitForSeconds(1);
@@ -89,6 +91,8 @@ public class GameManager : MonoBehaviour
 
     private void RespawnPacStudent()
     {
+        pacStudent.GetComponent<BoxCollider2D>().enabled = true;
+        pacStudent.GetComponent<Animator>().SetBool("IsDead", false);
         pacStudent.transform.position = new Vector3(-9.5f, 3.5f, 0);
         pacStudentController.gameObject.SetActive(true);
     }
@@ -127,12 +131,16 @@ public class GameManager : MonoBehaviour
     public void GhostEaten(Ghost ghost)
     {
         SetScore(score + ghost.points);
+        PlaySound(pelletEatSound);
     }
 
     public void PacStudentSlain()
     {
         tweener.ClearTweens();
         pacStudentController.gameObject.SetActive(false);
+        pacStudent.GetComponent<BoxCollider2D>().enabled = false;
+        PlaySound(deathSound);
+        pacStudent.GetComponent<Animator>().SetBool("IsDead", true);
         SetLives(lives - 1);
         inGameUI.UpdateLives(lives);
 
@@ -173,10 +181,8 @@ public class GameManager : MonoBehaviour
             }
         }
 
-        // Show the countdown timer UI starting from 10 seconds
         inGameUI.ShowGhostTimer(10);
 
-        // Start coroutine for scared state timer
         StartCoroutine(GhostScaredTimer());
     }
 
@@ -184,7 +190,9 @@ public class GameManager : MonoBehaviour
     {
         int timer = 10;
 
-        // Countdown loop
+        // Play scared music when timer starts
+        AudioManager.Instance.PlayScaredGhostsMusic();
+
         while (timer > 0)
         {
             if (timer == 3)
@@ -198,14 +206,14 @@ public class GameManager : MonoBehaviour
                         ghostComponent.SetRecovering();
                     }
                 }
+
             }
 
-            inGameUI.UpdateGhostTimer(timer); // Update the timer UI
-            yield return new WaitForSeconds(1); // Wait for one second
+            inGameUI.UpdateGhostTimer(timer);
+            yield return new WaitForSeconds(1);
             timer--;
         }
 
-        // Hide the ghost timer once countdown is complete
         inGameUI.HideGhostTimer();
 
         // Set all ghosts back to Normal state
@@ -217,6 +225,9 @@ public class GameManager : MonoBehaviour
                 ghostComponent.SetNormal();
             }
         }
+
+        // Change back to normal music
+        AudioManager.Instance.PlayNormalGhostsMusic();
     }
 
     public void CherryCollected(Cherry cherry)
@@ -257,4 +268,6 @@ public class GameManager : MonoBehaviour
         Time.timeScale = 1;
         SceneManager.LoadScene("StartScene");
     }
+
+
 }
